@@ -1,0 +1,1 @@
+![example of extension working](./demo.png)
