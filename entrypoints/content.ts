@@ -1,13 +1,48 @@
+import DOMPurify from 'dompurify';
 import { appliedJobs } from "./utils/storage";
 
 export default defineContentScript({
-  matches: ['*://*.workatastartup.com/*'],
+  matches: ['*://*.workatastartup.com/*', 'http://localhost/*'],
   main: async () => {
+    console.log("started WaaS Extension")
     const url = new URL(window.location.href);
     if (url.pathname.match(/^\/jobs\/\d+$/)) {
       await handleJobListingPage(url);
     } else if (url.pathname.match(/^\/companies$/)) {
       await handleCompaniesPage(url)
+    } else if (url.hostname.includes("localhost")) {
+      console.log("on localhost")
+      const jobIdsInLocalStorage = await appliedJobs.getValue();
+      console.log(`local storage jobs=${jobIdsInLocalStorage}`);
+      const table = document.getElementById('best-ordered-table');
+      if (table) {
+        const headerRow = table.querySelector('thead tr');
+        if (headerRow) {
+          const newHeaderCell = document.createElement('th');
+          newHeaderCell.textContent = 'Applied?'; // Set the header text
+          headerRow.prepend(DOMPurify.sanitize(newHeaderCell));
+        }
+        const rows = table.querySelectorAll('tr');
+        rows.forEach(row => {
+          if (row.parentNode?.nodeName !== "THEAD") {
+            const newCell = document.createElement('td');
+            const rowJobId = row.dataset.jobId;
+            console.log(`rowJobId=${rowJobId}`);
+            let applied = ''
+            if (rowJobId && !isNaN(Number(rowJobId))) {
+              applied = String(jobIdsInLocalStorage.includes(Number(rowJobId)))
+            }
+            console.log(`${applied}`);
+            newCell.textContent = DOMPurify.sanitize(applied);
+            if (applied === "true") {
+              row.style.backgroundColor = "#c1ffc2";
+            }
+
+            row.prepend(DOMPurify.sanitize(newCell));
+          }
+        });
+      }
+
     }
   }
 });

@@ -1,5 +1,5 @@
 {
-  "name": "WaaS Patch - you have applied to this one",
+  "name": "WaaS Patch you have applied to this one",
   "description": "Fix workatastartup to grey application buttons when you've already applied",
   "private": true,
   "version": "0.0.0",
@@ -15,6 +15,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "dompurify": "^3.2.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
